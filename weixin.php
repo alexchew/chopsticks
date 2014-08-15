@@ -98,8 +98,33 @@ class wechatCallbackapiTest
 									 <Url><![CDATA[%s]]></Url>
 									 </item>";
 						$itemList = "";
-						$itemCount = 0;			 
-						if($keyword=='campaign' || $keyword=='闪购'){
+						$itemCount = 0;		
+						if($keyword=='food' || $keyword=='食品'){
+							//get coupon list from remote JSON
+							$url = "http://124.42.107.200:8080/foodinfos";
+							$lines_array = file($url);
+							$lines_string = implode('',$lines_array);            
+							$json = htmlspecialchars($lines_string,ENT_NOQUOTES);
+							$array = json_decode($json);
+							for($i=0;$i<count($array);$i++){
+								if($itemCount>4)//we only display 4 items for mobile
+									break;
+								$object = $array[$i]; // The array could contain multiple instances of your content type
+								if(count($object->food)>0){
+									$title = "【".implode(' ',$object->food)."】".$object->title.' '.$object->time; 
+								}elseif(count($object->tag)>0){
+									$title = "【".implode(' ',$object->tag)."】".$object->title.' '.$object->time; 
+								}else{
+									$title = $object->title.' '.$object->time; 
+								}
+								$decription = $object->time.' '.$object->title;
+								$picUrl = $object->image;//"http://www.zhuqingchun.com/kill.jpg";
+								$linkUrl = $object->url;
+								$itemStr = sprintf($itemTpl,$title,$description,$picUrl,$linkUrl);
+								$itemList = $itemList.$itemStr;
+								$itemCount ++;
+							}						
+						}else if($keyword=='campaign' || $keyword=='闪购'){
 							//get campaign list from remote JSON
 							$url = "http://www.zhuqingchun.com/rest/campaign";
 							$lines_array = file($url);
